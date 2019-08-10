@@ -8,24 +8,22 @@ import com.example.common.Constants;
 
 public class ExtractErrorFn extends DoFn<String, String> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ExtractErrorFn.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ExtractErrorFn.class);
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
-	@ProcessElement
-	public void processElement(ProcessContext c) {
-		LOG.debug("extract error transform is started");
-		try {
-			if (c.element().contains(Constants.ERROR_NAME)) {
-				c.output(c.element());
-			}
-		} catch (Exception e) {
-			LOG.error("Failed ExtractError Transform:" + e.getLocalizedMessage(), e);
-		}
-		LOG.debug("extract error transform is finished");
+  @ProcessElement
+  public void processElement(ProcessContext c) {
+    try {
+      if (c.element().contains(Constants.ERROR_NAME)) {
+        c.output(c.element());
+      }
+    } catch (Exception e) {
+      LOG.error("Failed ExtractError Transform:" + e.getLocalizedMessage(), e);
+    }
 
-	}
+  }
 }

@@ -50,33 +50,34 @@ import com.example.subprocess.FormatAsTextFn;
  * --stagingLocation=<STAGING_LOCATION_IN_CLOUD_STORAGE> --runner=DataflowRunner
  */
 public class StarterPipeline {
-	private static final Logger LOG = LoggerFactory.getLogger(StarterPipeline.class);
+  private static final Logger LOG = LoggerFactory.getLogger(StarterPipeline.class);
 
-	public static void runErrorCount(MyOptions options) {
+  public static void runErrorCount(MyOptions options) {
 
-		LOG.debug("run errorcount pipeline function started");
-		try {
-			Pipeline pipeLine = Pipeline.create(options);
+    LOG.debug("run errorcount pipeline function started");
+    try {
+      Pipeline pipeLine = Pipeline.create(options);
 
-			PCollection<String> collections = pipeLine.apply("ReadLogFile",
-					TextIO.read().from(options.getMyCustomOption()));
+      PCollection<String> collections = pipeLine.apply("ReadLogFile",
+          TextIO.read().from(options.getMyCustomOption()));
 
-			collections.apply("FindError", ParDo.of(new ExtractErrorFn()))
-					.apply("ErrorCount", Count.globally()).apply("FormatResult", MapElements.via(new FormatAsTextFn()))
-					.apply("WriteCount", TextIO.write().to(EnvironmentConfig.OUTPUT_FILE_PATH));
+      collections.apply("ExtractServerError", ParDo.of(new ExtractErrorFn()))
+          .apply("ErrorCount", Count.globally())
+          .apply("FormatResult", MapElements.via(new FormatAsTextFn()))
+          .apply("WriteCount", TextIO.write().to(EnvironmentConfig.OUTPUT_FILE_PATH));
 
-			pipeLine.run();
-		} catch (Exception e) {
-			LOG.error("Failed pipeline:" + e.getLocalizedMessage(), e);
-		}
-		LOG.debug("run errorcount pipeline function finished");
-	}
+      pipeLine.run();
+    } catch (Exception e) {
+      LOG.error("Failed pipeline:" + e.getLocalizedMessage(), e);
+    }
+    LOG.debug("run errorcount pipeline function finished");
+  }
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		PipelineOptionsFactory.register(MyOptions.class);
-		MyOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(MyOptions.class);
-		runErrorCount(options);
+    PipelineOptionsFactory.register(MyOptions.class);
+    MyOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(MyOptions.class);
+    runErrorCount(options);
 
-	}
+  }
 }
